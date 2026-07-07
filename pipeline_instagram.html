@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pipeline Instagram — AyubCursos</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F0F2F7; --card: #FFFFFF; --border: #E5E7EB;
+    --text: #111827; --text2: #6B7280; --text3: #9CA3AF;
+    --accent: #E1306C; --accent2: #833AB4; --accent-dim: rgba(225,48,108,0.08);
+    --s0: #9CA3AF; --s1: #6B7FCC; --s2: #EAB308; --s3: #22C55E; --s4: #E1306C;
+    --t1-bg:#EEF2FF;--t1-border:#C7D2FE;--t1-text:#3730A3;
+    --t2-bg:#ECFDF5;--t2-border:#A7F3D0;--t2-text:#065F46;
+    --t3-bg:#FFFBEB;--t3-border:#FCD34D;--t3-text:#92400E;
+    --t4-bg:#FEF2F2;--t4-border:#FECACA;--t4-text:#991B1B;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* TOPBAR */
+  .topbar {
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    padding: 0 2rem; height: 64px;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 50;
+  }
+  .logo { display: flex; align-items: center; gap: 10px; }
+  .logo-icon {
+    width: 36px; height: 36px; border-radius: 8px;
+    background: linear-gradient(135deg, #E1306C, #833AB4);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 16px;
+  }
+  .logo-name { font-size: 16px; font-weight: 700; letter-spacing: 0.04em; }
+  .logo-sub  { font-size: 10px; color: var(--accent); letter-spacing: 0.1em; text-transform: uppercase; }
+  .topbar-actions { display: flex; gap: 8px; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 16px; border-radius: 6px;
+    font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 500;
+    cursor: pointer; border: none; transition: all 0.2s;
+  }
+  .btn-ghost { background: #F9FAFB; color: #374151; border: 1px solid var(--border); }
+  .btn-ghost:hover { background: #F3F4F6; }
+  .btn-insta { background: linear-gradient(135deg,#E1306C,#833AB4); color: #fff; }
+  .btn-insta:hover { opacity: 0.9; }
+  .btn-pdf { background: #F3F4F6; color: #374151; border: 1px solid var(--border); }
+
+  /* MAIN */
+  .main { padding: 1.5rem 2rem; max-width: 1600px; margin: 0 auto; }
+
+  /* STATS */
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px,1fr)); gap: 10px; margin-bottom: 1.5rem; }
+  .stat-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 14px; text-align: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .stat-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text3); margin-bottom: 4px; }
+  .stat-num   { font-size: 24px; font-weight: 700; color: var(--text); }
+  .stat-card.s-novo    .stat-num { color: #3730A3; }
+  .stat-card.s-morno   .stat-num { color: #065F46; }
+  .stat-card.s-quente  .stat-num { color: #92400E; }
+  .stat-card.s-urgente .stat-num { color: #991B1B; }
+
+  /* TOOLBAR */
+  .toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 1.25rem; }
+  .search-wrap { flex: 1; min-width: 200px; position: relative; }
+  .search-wrap input {
+    width: 100%; background: var(--card); border: 1px solid var(--border);
+    border-radius: 6px; padding: 8px 12px 8px 36px;
+    color: var(--text); font-family: 'Outfit', sans-serif; font-size: 13px;
+  }
+  .search-wrap input::placeholder { color: var(--text3); }
+  .search-icon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--text3); font-size: 14px; }
+  .filter-btn {
+    background: var(--card); border: 1px solid var(--border);
+    color: var(--text2); padding: 7px 14px; border-radius: 6px;
+    font-family: 'Outfit', sans-serif; font-size: 12px; cursor: pointer; transition: all 0.2s;
+  }
+  .filter-btn:hover, .filter-btn.active { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+
+  /* PIPELINE */
+  .pipeline-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text3); margin-bottom: 10px; }
+  .pipeline {
+    display: grid; grid-template-columns: repeat(5,1fr); gap: 0;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); overflow: visible;
+  }
+  .stage-col { border-right: 1px solid var(--border); min-height: 500px; display: flex; flex-direction: column; overflow: visible; }
+  .stage-col:last-child { border-right: none; }
+  .stage-head {
+    padding: 12px 12px 10px; border-bottom: 2px solid var(--border);
+    background: var(--card); min-height: 58px;
+    display: flex; flex-direction: column; justify-content: space-between;
+  }
+  .stage-head-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 6px; margin-bottom: 8px; }
+  .stage-dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; margin-right: 5px; flex-shrink: 0; margin-top: 2px; }
+  .stage-name { font-size: 11px; font-weight: 600; letter-spacing: 0.03em; line-height: 1.3; }
+  .stage-count { font-size: 10px; font-weight: 600; background: #F3F4F6; color: var(--text2); padding: 2px 7px; border-radius: 20px; }
+  .stage-bar { height: 3px; border-radius: 2px; background: #E5E7EB; overflow: hidden; flex-shrink: 0; }
+  .stage-bar-fill { height: 100%; border-radius: 2px; transition: width 0.4s; }
+  .stage-body { padding: 10px; flex: 1; background: #FAFBFD; overflow: visible; }
+
+  .col-0 .stage-head { border-bottom-color: var(--s0); } .col-0 .stage-dot { background: var(--s0); } .col-0 .stage-name { color: #6B7280; } .col-0 .stage-bar-fill { background: var(--s0); }
+  .col-1 .stage-head { border-bottom-color: var(--s1); } .col-1 .stage-dot { background: var(--s1); } .col-1 .stage-name { color: #4F6FCC; } .col-1 .stage-bar-fill { background: var(--s1); }
+  .col-2 .stage-head { border-bottom-color: var(--s2); } .col-2 .stage-dot { background: var(--s2); } .col-2 .stage-name { color: #D97706; } .col-2 .stage-bar-fill { background: var(--s2); }
+  .col-3 .stage-head { border-bottom-color: var(--s3); } .col-3 .stage-dot { background: var(--s3); } .col-3 .stage-name { color: #16A34A; } .col-3 .stage-bar-fill { background: var(--s3); }
+  .col-4 .stage-head { border-bottom-color: var(--s4); } .col-4 .stage-dot { background: var(--s4); } .col-4 .stage-name { color: #E1306C; } .col-4 .stage-bar-fill { background: var(--s4); }
+
+  /* LEAD CARD */
+  .lead-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px 10px 15px; margin-bottom: 8px; cursor: pointer;
+    transition: all 0.18s; position: relative; overflow: visible;
+  }
+  .lead-card::before {
+    content: ''; position: absolute; left: 0; top: 4px; bottom: 4px;
+    width: 3px; border-radius: 3px;
+  }
+  .lead-card.t-frio::before    { background: var(--t1-text); }
+  .lead-card.t-morno::before   { background: var(--t2-text); }
+  .lead-card.t-quente::before  { background: var(--t3-text); }
+  .lead-card.t-urgente::before { background: var(--t4-text); }
+  .lead-card:hover { border-color: var(--accent); box-shadow: 0 2px 8px rgba(225,48,108,0.1); transform: translateY(-1px); }
+
+  .lead-name  { font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .lead-insta { font-size: 11px; color: var(--accent); margin-bottom: 4px; }
+  .lead-comment { font-size: 10px; color: var(--text2); margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-style: italic; }
+  .lead-footer { display: flex; align-items: center; justify-content: space-between; }
+  .lead-date  { font-size: 10px; color: var(--text3); }
+  .lead-auto  { font-size: 9px; color: #833AB4; background: #F3E8FF; padding: 1px 6px; border-radius: 20px; font-weight: 600; }
+
+  .temp-pill { font-size: 9px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; padding: 2px 6px; border-radius: 20px; }
+  .temp-pill.t-frio    { background: var(--t1-bg); border: 1px solid var(--t1-border); color: var(--t1-text); }
+  .temp-pill.t-morno   { background: var(--t2-bg); border: 1px solid var(--t2-border); color: var(--t2-text); }
+  .temp-pill.t-quente  { background: var(--t3-bg); border: 1px solid var(--t3-border); color: var(--t3-text); }
+  .temp-pill.t-urgente { background: var(--t4-bg); border: 1px solid var(--t4-border); color: var(--t4-text); }
+
+  .add-card-btn {
+    width: 100%; background: transparent; border: 1px dashed var(--border);
+    border-radius: 8px; padding: 8px; color: var(--text3); font-size: 12px;
+    font-family: 'Outfit', sans-serif; cursor: pointer; transition: all 0.2s;
+    display: flex; align-items: center; justify-content: center; gap: 5px; margin-top: 4px;
+  }
+  .add-card-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(17,24,39,0.45); backdrop-filter: blur(4px);
+    display: flex; align-items: center; justify-content: center; z-index: 200; padding: 1rem;
+  }
+  .modal {
+    background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+    padding: 1.5rem; width: 100%; max-width: 440px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+  }
+  .modal-title { font-size: 16px; font-weight: 600; margin-bottom: 1.25rem; color: var(--text); display: flex; align-items: center; gap: 8px; }
+  .modal-title span { color: var(--accent); }
+  .form-row { margin-bottom: 12px; }
+  .form-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text2); margin-bottom: 4px; display: block; }
+  .form-input, .form-select, .form-textarea {
+    width: 100%; background: #F9FAFB; border: 1px solid var(--border);
+    border-radius: 6px; padding: 8px 12px;
+    color: var(--text); font-family: 'Outfit', sans-serif; font-size: 13px;
+  }
+  .form-input:focus, .form-select:focus, .form-textarea:focus { outline: none; border-color: var(--accent); }
+  .form-input::placeholder, .form-textarea::placeholder { color: var(--text3); }
+  .form-select option { background: #fff; }
+  .form-textarea { resize: vertical; min-height: 60px; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .modal-footer { display: flex; gap: 8px; justify-content: flex-end; margin-top: 1.25rem; }
+  .btn-cancel { background: #F9FAFB; border: 1px solid var(--border); padding: 7px 14px; border-radius: 6px; font-size: 13px; cursor: pointer; color: var(--text2); font-family: 'Outfit', sans-serif; }
+  .btn-save { background: linear-gradient(135deg,#E1306C,#833AB4); color: #fff; border: none; padding: 7px 16px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'Outfit', sans-serif; }
+
+  .detail-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text3); margin-bottom: 3px; }
+  .detail-value { font-size: 13px; color: var(--text); margin-bottom: 10px; }
+  .detail-obs { background: #F9FAFB; border-radius: 6px; padding: 8px 12px; font-size: 12px; color: var(--text2); line-height: 1.5; min-height: 36px; margin-bottom: 10px; }
+  .detail-comment { background: #FFF0F6; border-left: 3px solid var(--accent); border-radius: 4px; padding: 8px 12px; font-size: 12px; color: #6B0F2A; font-style: italic; margin-bottom: 10px; }
+  .wa-link { color: #065F46; text-decoration: none; font-size: 12px; }
+  .wa-link:hover { text-decoration: underline; }
+  .btn-sm { font-size: 12px; padding: 5px 10px; border-radius: 6px; border: 1px solid var(--border); cursor: pointer; background: #F9FAFB; color: var(--text); font-family: 'Outfit', sans-serif; }
+  .btn-sm:hover { background: #F3F4F6; }
+  .btn-del { color: #991B1B; border-color: #FECACA; background: #FEF2F2; }
+
+  /* WEBHOOK BOX */
+  .webhook-modal .webhook-box {
+    background: #0F172A; border-radius: 8px; padding: 12px 14px;
+    font-family: monospace; font-size: 11px; color: #7DD3FC;
+    word-break: break-all; margin: 10px 0; line-height: 1.6;
+  }
+  .webhook-modal .step { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 12px; font-size: 13px; color: var(--text2); }
+  .webhook-modal .step-num { background: var(--accent); color: #fff; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+
+  .toast {
+    position: fixed; bottom: 2rem; right: 2rem;
+    background: var(--card); border: 1px solid var(--border); border-left: 3px solid var(--accent);
+    border-radius: 8px; padding: 12px 16px; font-size: 13px; color: var(--text);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 999;
+    opacity: 0; transform: translateY(10px); transition: all 0.3s; pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+  .empty-state { text-align: center; padding: 2rem 1rem; color: var(--text3); }
+
+  /* NEW badge */
+  .new-badge { display: inline-block; background: #DCFCE7; color: #166534; font-size: 9px; font-weight: 700; padding: 1px 6px; border-radius: 20px; margin-left: 6px; vertical-align: middle; }
+
+  @media (max-width: 768px) {
+    .topbar { height: auto; padding: 10px 14px; flex-wrap: wrap; gap: 8px; }
+    .topbar-actions { width: 100%; }
+    .topbar-actions .btn { flex: 1; justify-content: center; font-size: 11px; padding: 6px 8px; }
+    .main { padding: 12px; }
+    .stats { grid-template-columns: repeat(3,1fr); gap: 8px; }
+    .pipeline { display: flex; flex-direction: column; }
+    .stage-col { border-right: none; border-bottom: 1px solid var(--border); min-height: auto; }
+    .modal-overlay { align-items: flex-end; padding: 0; }
+    .modal { border-radius: 16px 16px 0 0; max-width: 100%; padding: 1.25rem 1rem 2rem; max-height: 90vh; overflow-y: auto; }
+    .form-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="logo">
+    <div class="logo-icon">📸</div>
+    <div>
+      <div class="logo-name">AyubCursos</div>
+      <div class="logo-sub">Pipeline Instagram</div>
+    </div>
+  </div>
+  <div class="topbar-actions">
+    <button class="btn btn-ghost" onclick="openWebhookInfo()">🔗 Webhook ManyChat</button>
+    <button class="btn btn-ghost" onclick="openAdd()">+ Novo lead</button>
+    <button class="btn btn-pdf" onclick="exportPDF()">⬇ PDF</button>
+  </div>
+</header>
+
+<main class="main">
+  <div class="stats" id="stats"></div>
+  <div class="toolbar">
+    <div class="search-wrap">
+      <span class="search-icon">⌕</span>
+      <input type="text" id="search" placeholder="Buscar por nome ou @instagram..." oninput="render()">
+    </div>
+    <button class="filter-btn active" onclick="setFilter(this,'')">Todos</button>
+    <button class="filter-btn" onclick="setFilter(this,'frio')">❄ Frio</button>
+    <button class="filter-btn" onclick="setFilter(this,'morno')">🌿 Morno</button>
+    <button class="filter-btn" onclick="setFilter(this,'quente')">🔥 Quente</button>
+    <button class="filter-btn" onclick="setFilter(this,'urgente')">⚡ Urgente</button>
+  </div>
+  <p class="pipeline-label">Pipeline · <span id="count">0</span> leads</p>
+  <div class="pipeline" id="pipeline"></div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SUPA_URL = 'https://aadwbtxealrzdmwfnuso.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFhZHdidHhlYWxyemRtd2ZudXNvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM0MTcxOTgsImV4cCI6MjA5ODk5MzE5OH0.eiTijNyY1L1hx-_CMM2W5U--7J3irHiwwNYIphSONPE';
+const SUPA_HEADERS = {
+  'apikey': SUPA_KEY,
+  'Authorization': 'Bearer ' + SUPA_KEY,
+  'Content-Type': 'application/json',
+  'Prefer': 'return=representation',
+};
+function supaUrl(table, params='') {
+  return `${SUPA_URL}/rest/v1/${table}?apikey=${SUPA_KEY}${params ? '&'+params : ''}`;
+}
+
+// Webhook URL para ManyChat
+const WEBHOOK_URL = `${SUPA_URL}/rest/v1/pipeline_instagram?apikey=${SUPA_KEY}`;
+
+const STAGES = [
+  { id: 0, label: 'Sem Interesse' },
+  { id: 1, label: 'Não Respondeu' },
+  { id: 2, label: 'Aguardando Retorno' },
+  { id: 3, label: 'Em Negociação' },
+  { id: 4, label: 'Fechado ✓' },
+];
+const TEMPS = [
+  { id: 'frio',    label: 'Frio',    icon: '❄' },
+  { id: 'morno',   label: 'Morno',   icon: '🌿' },
+  { id: 'quente',  label: 'Quente',  icon: '🔥' },
+  { id: 'urgente', label: 'Urgente', icon: '⚡' },
+];
+
+let leads = [];
+let activeFilter = '';
+let editingId = null;
+
+function parseLocalDate(str) {
+  if (!str) return null;
+  const [y, m, d] = str.split('-').map(Number);
+  return new Date(y, m - 1, d);
+}
+
+async function loadLeads() {
+  try {
+    const r = await fetch(supaUrl('pipeline_instagram', 'select=*&order=created_at.desc'), { headers: SUPA_HEADERS });
+    const data = await r.json();
+    leads = Array.isArray(data) ? data : [];
+    render();
+  } catch(e) { toast('Erro ao carregar: ' + e.message); }
+}
+
+function filtered() {
+  const q = (document.getElementById('search').value||'').toLowerCase();
+  return leads.filter(l => {
+    if (activeFilter && l.temp !== activeFilter) return false;
+    if (q && !( (l.name||'').toLowerCase().includes(q) || (l.instagram||'').toLowerCase().includes(q) )) return false;
+    return true;
+  });
+}
+
+function setFilter(el, val) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  activeFilter = val;
+  render();
+}
+
+function render() {
+  const fl = filtered();
+  document.getElementById('count').textContent = fl.length;
+
+  // Stats
+  const byTemp = {};
+  TEMPS.forEach(t => byTemp[t.id] = fl.filter(l => l.temp === t.id).length);
+  const conv = fl.filter(l => l.stage === 4).length;
+  const hoje = fl.filter(l => {
+    if (!l.created_at) return false;
+    const d = new Date(l.created_at);
+    const now = new Date();
+    return d.toDateString() === now.toDateString();
+  }).length;
+
+  document.getElementById('stats').innerHTML = `
+    <div class="stat-card"><div class="stat-label">Total</div><div class="stat-num">${fl.length}</div></div>
+    <div class="stat-card s-novo"><div class="stat-label">Hoje</div><div class="stat-num">${hoje}</div></div>
+    <div class="stat-card s-morno"><div class="stat-label">🌿 Mornos</div><div class="stat-num">${byTemp.morno||0}</div></div>
+    <div class="stat-card s-quente"><div class="stat-label">🔥 Quentes</div><div class="stat-num">${byTemp.quente||0}</div></div>
+    <div class="stat-card s-urgente"><div class="stat-label">⚡ Urgentes</div><div class="stat-num">${byTemp.urgente||0}</div></div>
+    <div class="stat-card"><div class="stat-label">✅ Fechados</div><div class="stat-num" style="color:var(--accent)">${conv}</div></div>
+  `;
+
+  // Pipeline
+  const container = document.getElementById('pipeline');
+  container.innerHTML = '';
+  const total = fl.length || 1;
+
+  STAGES.forEach((st, idx) => {
+    const group = fl.filter(l => l.stage === st.id);
+    const pct = Math.round((group.length / total) * 100);
+    const col = document.createElement('div');
+    col.className = `stage-col col-${idx}`;
+
+    const cards = group.length === 0
+      ? `<div class="empty-state"><p>Nenhum lead<br>nesta etapa</p></div>`
+      : group.map(l => {
+          const tl = TEMPS.find(t => t.id === l.temp) || TEMPS[0];
+          const isAuto = !l.obs || l.obs.includes('ManyChat') || l.comment;
+          return `<div class="lead-card t-${l.temp}" data-id="${l.id}">
+            <div class="lead-name">${l.name || 'Sem nome'}</div>
+            ${l.instagram ? `<div class="lead-insta">@${l.instagram.replace('@','')}</div>` : ''}
+            ${l.comment ? `<div class="lead-comment">"${l.comment}"</div>` : ''}
+            <div class="lead-footer">
+              <span class="temp-pill t-${l.temp}">${tl.icon} ${tl.label}</span>
+              <span style="display:flex;align-items:center;gap:4px">
+                ${isAuto && l.comment ? '<span class="lead-auto">AUTO</span>' : ''}
+                <span class="lead-date">${l.date || new Date(l.created_at).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})}</span>
+              </span>
+            </div>
+          </div>`;
+        }).join('');
+
+    col.innerHTML = `
+      <div class="stage-head">
+        <div class="stage-head-top">
+          <div style="display:flex;align-items:flex-start"><span class="stage-dot"></span><span class="stage-name">${st.label}</span></div>
+          <span class="stage-count">${group.length}</span>
+        </div>
+        <div class="stage-bar"><div class="stage-bar-fill" style="width:${pct}%"></div></div>
+      </div>
+      <div class="stage-body">
+        ${cards}
+        <button class="add-card-btn" onclick="openAdd(${st.id})">+ Adicionar lead</button>
+      </div>
+    `;
+    container.appendChild(col);
+  });
+
+  container.querySelectorAll('.lead-card').forEach(el => {
+    el.addEventListener('click', () => viewLead(parseInt(el.dataset.id)));
+  });
+}
+
+// ── FORM ──
+function openAdd(stageId = 1) {
+  editingId = null;
+  showForm({ name:'', instagram:'', phone:'', email:'', comment:'', post:'', temp:'frio', stage: stageId, obs:'' });
+}
+
+function showForm(data) {
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay'; overlay.id = 'form-overlay';
+  overlay.innerHTML = `<div class="modal">
+    <div class="modal-title">✦ <span>${editingId ? 'Editar lead' : 'Novo lead'}</span></div>
+    <div class="form-grid">
+      <div class="form-row"><label class="form-label">Nome</label><input class="form-input" id="f-name" value="${data.name||''}" placeholder="Nome completo"></div>
+      <div class="form-row"><label class="form-label">Instagram</label><input class="form-input" id="f-insta" value="${data.instagram||''}" placeholder="@usuario"></div>
+    </div>
+    <div class="form-grid">
+      <div class="form-row"><label class="form-label">Telefone</label><input class="form-input" id="f-phone" value="${data.phone||''}" placeholder="(XX) 9XXXX-XXXX"></div>
+      <div class="form-row"><label class="form-label">Email</label><input class="form-input" id="f-email" value="${data.email||''}" placeholder="email@exemplo.com"></div>
+    </div>
+    <div class="form-row"><label class="form-label">Comentário no post</label><input class="form-input" id="f-comment" value="${data.comment||''}" placeholder="O que comentou..."></div>
+    <div class="form-row"><label class="form-label">Post / Origem</label><input class="form-input" id="f-post" value="${data.post||''}" placeholder="Nome ou link do post"></div>
+    <div class="form-grid">
+      <div class="form-row"><label class="form-label">Temperatura</label>
+        <select class="form-select" id="f-temp">
+          ${TEMPS.map(t => `<option value="${t.id}" ${data.temp===t.id?'selected':''}>${t.icon} ${t.label}</option>`).join('')}
+        </select></div>
+      <div class="form-row"><label class="form-label">Etapa</label>
+        <select class="form-select" id="f-stage">
+          ${STAGES.map(s => `<option value="${s.id}" ${data.stage===s.id?'selected':''}>${s.label}</option>`).join('')}
+        </select></div>
+    </div>
+    <div class="form-row"><label class="form-label">Observações</label><textarea class="form-textarea" id="f-obs" placeholder="Notas...">${data.obs||''}</textarea></div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal('form-overlay')">Cancelar</button>
+      <button class="btn-save" onclick="saveLead()">Salvar</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+}
+
+async function saveLead() {
+  const name = document.getElementById('f-name').value.trim();
+  const insta = document.getElementById('f-insta').value.trim();
+  if (!name && !insta) { toast('Informe nome ou @instagram.'); return; }
+  const data = {
+    name: name || insta,
+    instagram: insta,
+    phone: document.getElementById('f-phone').value.trim(),
+    email: document.getElementById('f-email').value.trim(),
+    comment: document.getElementById('f-comment').value.trim(),
+    post: document.getElementById('f-post').value.trim(),
+    temp: document.getElementById('f-temp').value,
+    stage: parseInt(document.getElementById('f-stage').value),
+    obs: document.getElementById('f-obs').value.trim(),
+    date: new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}),
+  };
+  if (editingId) {
+    await fetch(supaUrl('pipeline_instagram', `id=eq.${editingId}`), { method:'PATCH', headers: SUPA_HEADERS, body: JSON.stringify(data) });
+    toast('Lead atualizado ✓');
+  } else {
+    await fetch(supaUrl('pipeline_instagram'), { method:'POST', headers: {...SUPA_HEADERS,'Prefer':'return=minimal'}, body: JSON.stringify(data) });
+    toast('Lead adicionado ✓');
+  }
+  closeModal('form-overlay'); loadLeads();
+}
+
+// ── DETAIL ──
+function viewLead(id) {
+  const l = leads.find(x => x.id === id); if (!l) return;
+  const tl = TEMPS.find(t => t.id === l.temp) || TEMPS[0];
+  const sl = STAGES.find(s => s.id === l.stage);
+  const waUrl = l.phone ? `https://wa.me/55${l.phone.replace(/\D/g,'')}` : null;
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay'; overlay.id = 'detail-overlay';
+  overlay.innerHTML = `<div class="modal">
+    <div class="modal-title">✦ <span>${l.name || l.instagram || '—'}</span></div>
+    <div class="form-grid" style="margin-bottom:12px">
+      <div><div class="detail-label">Temperatura</div><span class="temp-pill t-${l.temp}">${tl.icon} ${tl.label}</span></div>
+      <div><div class="detail-label">Etapa</div><div class="detail-value">${sl?.label}</div></div>
+    </div>
+    ${l.comment ? `<div class="detail-label">Comentário</div><div class="detail-comment">"${l.comment}"</div>` : ''}
+    ${l.post ? `<div class="detail-label">Post / Origem</div><div class="detail-value" style="font-size:12px;color:var(--text2)">${l.post}</div>` : ''}
+    <div class="detail-label">Instagram</div>
+    <div class="detail-value">${l.instagram ? `<a href="https://instagram.com/${l.instagram.replace('@','')}" target="_blank" style="color:var(--accent)">@${l.instagram.replace('@','')} ↗</a>` : '—'}</div>
+    <div class="detail-label">Telefone</div>
+    <div class="detail-value">${l.phone ? `${l.phone} — <a class="wa-link" href="${waUrl}" target="_blank">WhatsApp ↗</a>` : '—'}</div>
+    <div class="detail-label">Observações</div>
+    <div class="detail-obs">${l.obs || 'Nenhuma observação.'}</div>
+    <div class="form-grid" style="margin-top:12px">
+      <div><div class="detail-label" style="margin-bottom:6px">Mover etapa</div>
+        <div style="display:flex;gap:6px">
+          <button class="btn-sm" style="flex:1" onclick="moveStage(${id},-1)">← Voltar</button>
+          <button class="btn-sm" style="flex:1" onclick="moveStage(${id},1)">Avançar →</button>
+        </div></div>
+      <div><div class="detail-label" style="margin-bottom:6px">Ações</div>
+        <div style="display:flex;gap:6px">
+          <button class="btn-sm" style="flex:1;background:linear-gradient(135deg,#E1306C,#833AB4);color:#fff;border:none" onclick="editLead(${id})">✏ Editar</button>
+          <button class="btn-sm btn-del" onclick="deleteLead(${id})">🗑</button>
+        </div></div>
+    </div>
+    <div class="modal-footer"><button class="btn-cancel" onclick="closeModal('detail-overlay')">Fechar</button></div>
+  </div>`;
+  document.body.appendChild(overlay);
+}
+
+async function moveStage(id, dir) {
+  const idx = leads.findIndex(l => l.id === id); if (idx < 0) return;
+  const ns = Math.max(0, Math.min(4, leads[idx].stage + dir));
+  await fetch(supaUrl('pipeline_instagram', `id=eq.${id}`), { method:'PATCH', headers: SUPA_HEADERS, body: JSON.stringify({ stage: ns }) });
+  closeModal('detail-overlay'); loadLeads(); toast('Etapa atualizada ✓');
+}
+function editLead(id) { editingId = id; const l = leads.find(x => x.id===id); closeModal('detail-overlay'); showForm(l); }
+async function deleteLead(id) {
+  if (!confirm('Remover este lead?')) return;
+  await fetch(supaUrl('pipeline_instagram', `id=eq.${id}`), { method:'DELETE', headers: SUPA_HEADERS });
+  closeModal('detail-overlay'); loadLeads(); toast('Lead removido');
+}
+function closeModal(id) { document.getElementById(id)?.remove(); }
+
+// ── WEBHOOK INFO ──
+function openWebhookInfo() {
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay webhook-modal'; overlay.id = 'webhook-overlay';
+  overlay.innerHTML = `<div class="modal" style="max-width:500px">
+    <div class="modal-title">🔗 <span>Configurar ManyChat</span></div>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:14px">Configure o ManyChat para enviar leads automaticamente para este pipeline quando alguém comentar no Instagram.</p>
+    
+    <div class="step"><div class="step-num">1</div><div>No ManyChat, abra o flow que responde ao comentário do post, no bloco onde o lead "esquenta" (ex: "Falar com equipe").</div></div>
+    <div class="step"><div class="step-num">2</div><div>No Próximo Passo desse bloco, vá em <b>Mais → Executar Ações → Automação → "Fazer uma consulta externa"</b>.</div></div>
+    <div class="step"><div class="step-num">3</div><div>Configure assim:<br>
+      <b>Tipo de Pedido:</b> POST<br>
+      <b>URL:</b></div></div>
+    <div class="webhook-box">${WEBHOOK_URL}</div>
+    
+    <div class="step"><div class="step-num">4</div><div>Na aba <b>Cabeçalho</b>, adicione:<br>
+      <code>Content-Type: application/json</code><br>
+      <code>apikey: ${SUPA_KEY.substring(0,30)}...</code></div></div>
+    
+    <div class="step"><div class="step-num">5</div><div>Na aba <b>Corpo</b>, cole este JSON. Os valores abaixo devem ser inseridos pelo botão <b>"Adicionar Campo"</b> do ManyChat (não digite como texto):<br></div></div>
+    <div class="webhook-box">{
+  "name": "Nome Completo",
+  "instagram": "Usuário",
+  "phone": "Celular",
+  "comment": "Última Entrada de Texto",
+  "post": "NOME DO SEU POST/ROTA AQUI",
+  "temp": "frio",
+  "stage": 1
+}</div>
+    <p style="font-size:12px;color:var(--text2);margin:6px 0 0">⚠️ "post" é texto fixo — edite para identificar a rota/post de origem do lead. Não é necessário enviar "date": a coluna já é preenchida automaticamente pelo Supabase.</p>
+    <div class="step"><div class="step-num">6</div><div>Salve e teste — o lead vai aparecer automaticamente aqui no pipeline! 🎉</div></div>
+    
+    <button class="btn-save" style="width:100%;margin-top:8px" onclick="navigator.clipboard.writeText('${WEBHOOK_URL}');toast('URL copiada! ✓')">📋 Copiar URL do Webhook</button>
+    <div class="modal-footer"><button class="btn-cancel" onclick="closeModal('webhook-overlay')">Fechar</button></div>
+  </div>`;
+  document.body.appendChild(overlay);
+}
+
+// ── PDF ──
+function exportPDF() {
+  const STAGE_NAMES = STAGES.map(s => s.label);
+  const TEMP_NAMES  = { frio:'❄ Frio', morno:'🌿 Morno', quente:'🔥 Quente', urgente:'⚡ Urgente' };
+  const TEMP_COLORS = { frio:'#3730A3', morno:'#065F46', quente:'#92400E', urgente:'#991B1B' };
+  const STAGE_COLORS = ['#9CA3AF','#6B7FCC','#EAB308','#22C55E','#E1306C'];
+  const now = new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'});
+  const fl = filtered();
+
+  let stagesHTML = '';
+  for (let si = 0; si < 5; si++) {
+    const group = fl.filter(l => l.stage === si);
+    if (!group.length) continue;
+    stagesHTML += `<div class="stage-section">
+      <div class="stage-title" style="border-left:4px solid ${STAGE_COLORS[si]};color:${STAGE_COLORS[si]}">${STAGE_NAMES[si]} <span>(${group.length})</span></div>
+      <div class="cards-grid">
+        ${group.map(l => {
+          const tc = TEMP_COLORS[l.temp] || '#3730A3';
+          return `<div class="card" style="border-left:3px solid ${tc}">
+            <div class="card-name">${l.name || l.instagram || '—'}</div>
+            ${l.instagram ? `<div class="card-insta">@${l.instagram.replace('@','')}</div>` : ''}
+            ${l.phone ? `<div class="card-phone">${l.phone}</div>` : ''}
+            <div class="card-row">
+              <span class="card-temp" style="color:${tc};border:1px solid ${tc};background:${tc}18">${TEMP_NAMES[l.temp]||l.temp}</span>
+              <span class="card-date">${l.date||''}</span>
+            </div>
+            ${l.comment ? `<div class="card-comment">"${l.comment}"</div>` : ''}
+            ${l.obs ? `<div class="card-obs">${l.obs}</div>` : ''}
+          </div>`;
+        }).join('')}
+      </div></div>`;
+  }
+
+  const fullHTML = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Pipeline Instagram</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap');
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Outfit',sans-serif;background:#fff;color:#111827;padding:2cm;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    .header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;padding-bottom:16px;border-bottom:2px solid #E5E7EB}
+    .logo-row{display:flex;align-items:center;gap:12px}
+    .logo-sq{width:40px;height:40px;border-radius:8px;background:linear-gradient(135deg,#E1306C,#833AB4);display:flex;align-items:center;justify-content:center;font-size:18px}
+    .logo-name{font-size:20px;font-weight:700}
+    .logo-sub{font-size:10px;color:#E1306C;text-transform:uppercase;letter-spacing:0.1em}
+    .header-meta{text-align:right;font-size:11px;color:#9CA3AF}
+    .stats{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:20px}
+    .stat{border:1px solid #E5E7EB;border-radius:8px;padding:10px;text-align:center}
+    .stat-l{font-size:9px;text-transform:uppercase;letter-spacing:0.1em;color:#9CA3AF;margin-bottom:3px}
+    .stat-n{font-size:22px;font-weight:700;color:#111827}
+    .stage-section{margin-bottom:20px}
+    .stage-title{font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:6px 12px;margin-bottom:10px;background:#F9FAFB;border-radius:4px}
+    .stage-title span{font-weight:400;opacity:0.6;font-size:10px;margin-left:4px}
+    .cards-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+    .card{border:1px solid #E5E7EB;border-radius:8px;padding:10px 12px;break-inside:avoid}
+    .card-name{font-size:12px;font-weight:600;margin-bottom:2px}
+    .card-insta{font-size:10px;color:#E1306C;margin-bottom:2px}
+    .card-phone{font-size:10px;color:#6B7280;margin-bottom:6px}
+    .card-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+    .card-temp{font-size:9px;font-weight:600;padding:2px 7px;border-radius:20px}
+    .card-date{font-size:9px;color:#9CA3AF}
+    .card-comment{font-size:9px;color:#6B0F2A;font-style:italic;margin-top:5px;padding:4px 8px;background:#FFF0F6;border-left:2px solid #E1306C;border-radius:2px}
+    .card-obs{font-size:9px;color:#6B7280;margin-top:4px;border-top:1px solid #F3F4F6;padding-top:4px}
+    .footer{margin-top:20px;padding-top:12px;border-top:1px solid #E5E7EB;display:flex;justify-content:space-between;font-size:9px;color:#9CA3AF}
+  </style></head><body>
+  <div class="header">
+    <div class="logo-row"><div class="logo-sq">📸</div>
+    <div><div class="logo-name">AyubCursos</div><div class="logo-sub">Pipeline Instagram</div></div></div>
+    <div class="header-meta">Gerado em ${now}<br>${fl.length} leads</div>
+  </div>
+  ${stagesHTML}
+  <div class="footer"><span>AyubCursos · Pipeline Instagram · Confidencial</span><span>Exportado em ${now}</span></div>
+  <script>window.addEventListener('load',()=>setTimeout(()=>window.print(),600))<\/script>
+  </body></html>`;
+
+  const blob = new Blob([fullHTML], { type: 'text/html;charset=utf-8' });
+  const win = window.open(URL.createObjectURL(blob), '_blank');
+  if (!win) toast('Permita pop-ups para exportar o PDF.');
+}
+
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+loadLeads();
+</script>
+</body>
+</html>
